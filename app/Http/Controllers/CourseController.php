@@ -38,7 +38,19 @@ class CourseController extends Controller
 
     public function index()
     {
-        return view('courses.index', ['courses' => $this->courses]);
+        // [FIX] Logika penyaringan data dipindahkan dari View ke sini (Controller).
+        // View seharusnya hanya menampilkan data, bukan mengolahnya.
+        // Sebelumnya array_filter() ada di index.blade.php — itu keliru.
+        //
+        // [FIX] Bug 1: Variabel yang benar adalah $this->courses, bukan $courses.
+        // $courses tanpa $this-> tidak terdefinisi dan akan menyebabkan error.
+        //
+        // [FIX] Bug 2: Sebelumnya yang dikirim ke View adalah $this->courses (semua data),
+        // bukan $activeCourses hasil filter. Sekarang sudah dibenarkan.
+        $activeCourses = array_filter($this->courses, function($c) {
+            return $c['status'] === 'active';
+        });
+        return view('courses.index', ['activeCourses' => $activeCourses]);
     }
 
     public function create()

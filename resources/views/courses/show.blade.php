@@ -6,7 +6,18 @@
         <div class="border-t pt-4">
             <h2 class="text-xl font-semibold mb-2">Deskripsi Mata Kuliah</h2>
             <div class="prose">
-                {!! $course['description'] !!}
+                {{--
+                    [MASALAH - XSS] Kode lama menggunakan {!! $course['description'] !!}.
+                    Tanda {!! !!} menampilkan HTML mentah tanpa filter, sehingga jika user
+                    memasukkan <script>alert('hack')</script> di deskripsi,
+                    script itu akan langsung dijalankan oleh browser. Ini berbahaya!
+                --}}
+                {{--
+                    [FIX - XSS] Ganti {!! !!} dengan {{ }} (double curly braces).
+                    Laravel otomatis mengubah karakter HTML seperti < > " menjadi entitas aman,
+                    sehingga script dari user hanya ditampilkan sebagai teks biasa, bukan dieksekusi.
+                --}}
+                {{ $course['description'] }}
             </div>
         </div>
 
