@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CourseController extends Controller
 {
@@ -41,14 +42,29 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        Course::create([
-            'code' => $request->code,
-            'name' => $request->name,
-            'description' => $request->description,
-            'sks' => $request->sks,
-            'lecturer_id' => $request->lecturer_id,
-            'status' => $request->status ?? 'draft',
+        // Sebelumnya validasi hanya dilakukan di sisi frontend (HTML required/min/max) tanpa validasi server-side pada method store(), sehingga request langsung dapat memasukkan data tidak valid atau memicu celah mass assignment. Diperbaiki dengan validasi server-side menggunakan $request->validate() dan hanya menyimpan field terverifikasi ($validated).
+        $validated = $request->validate([
+            'code' => 'required|string|max:20|unique:courses,code',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'sks' => 'required|integer|min:1|max:6',
+            'lecturer_id' => 'required|exists:users,id',
+            'status' => 'required|in:draft,active,archived',
+        ], [
+            'code.required' => 'Kode mata kuliah wajib diisi.',
+            'code.unique' => 'Kode mata kuliah ini sudah dipakai.',
+            'name.required' => 'Nama mata kuliah wajib diisi.',
+            'sks.required' => 'Jumlah SKS wajib diisi.',
+            'sks.integer' => 'SKS harus berupa bilangan bulat.',
+            'sks.min' => 'SKS minimal 1.',
+            'sks.max' => 'SKS maksimal 6.',
+            'lecturer_id.required' => 'Dosen pengampu wajib dipilih.',
+            'lecturer_id.exists' => 'Dosen pengampu tidak valid.',
+            'status.required' => 'Status publikasi wajib dipilih.',
+            'status.in' => 'Status publikasi tidak valid.',
         ]);
+
+        Course::create($validated);
 
         // $courses = Course::paginate(10);
         // return view('courses.index', compact('courses'));, pada baris kode ini method store langsung mengembalikan view courses.index tanpa melakukan redirect, sehingga melanggar pola Post/Redirect/Get (PRG) dan berisiko memicu form resubmission (duplikasi data saat halaman di-refresh), serta memotong logika filter dan eager loading relasi yang ada di method index(). Seharusnya diarahkan menggunakan redirect() ke route courses.index dengan membawa flash message notifikasi berhasil.
@@ -71,13 +87,26 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course)
     {
+        // Sebelumnya 'code' => 'required|string|max:20|unique:courses,code' menyebabkan kegagalan validasi saat UPDATE jika kode mata kuliah tidak diubah, karena query unique menganggap record yang sedang diedit sebagai duplikat dirinya sendiri. Diperbaiki menggunakan Rule::unique('courses', 'code')->ignore($course->id).
         $validated = $request->validate([
-            'code' => 'required|string|max:20|unique:courses,code',
+            'code' => ['required', 'string', 'max:20', Rule::unique('courses', 'code')->ignore($course->id)],
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'sks' => 'required|integer|min:1|max:6',
             'lecturer_id' => 'required|exists:users,id',
             'status' => 'required|in:draft,active,archived',
+        ], [
+            'code.required' => 'Kode mata kuliah wajib diisi.',
+            'code.unique' => 'Kode mata kuliah ini sudah dipakai.',
+            'name.required' => 'Nama mata kuliah wajib diisi.',
+            'sks.required' => 'Jumlah SKS wajib diisi.',
+            'sks.integer' => 'SKS harus berupa bilangan bulat.',
+            'sks.min' => 'SKS minimal 1.',
+            'sks.max' => 'SKS maksimal 6.',
+            'lecturer_id.required' => 'Dosen pengampu wajib dipilih.',
+            'lecturer_id.exists' => 'Dosen pengampu tidak valid.',
+            'status.required' => 'Status publikasi wajib dipilih.',
+            'status.in' => 'Status publikasi tidak valid.',
         ]);
 
         $course->update($validated);
