@@ -33,7 +33,8 @@ class CourseController extends Controller
             $query->where('status', $status);
         }
 
-        $courses = $query->paginate(10);
+        // $courses = $query->paginate(10);, pada baris kode ini CourseController.php memanggil paginate(10) tanpa withQueryString(), sehingga ketika user berpindah halaman (klik halaman 2, 3, dst.), parameter filter seperti ?search=... dan ?status=... ikut hilang dari URL, yang menyebabkan hasil filter ter-reset ke kondisi awal meski user sudah melakukan pencarian, seharusnya ditambahkan ->withQueryString() agar query string tetap diteruskan ke setiap link halaman pagination.
+        $courses = $query->paginate(10)->withQueryString();
 
         return view('courses.index', compact('courses'));
     }
