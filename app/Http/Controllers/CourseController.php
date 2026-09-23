@@ -50,9 +50,9 @@ class CourseController extends Controller
             'status' => $request->status ?? 'draft',
         ]);
 
-        $courses = Course::paginate(10);
-
-        return view('courses.index', compact('courses'));
+        // $courses = Course::paginate(10);
+        // return view('courses.index', compact('courses'));, pada baris kode ini method store langsung mengembalikan view courses.index tanpa melakukan redirect, sehingga melanggar pola Post/Redirect/Get (PRG) dan berisiko memicu form resubmission (duplikasi data saat halaman di-refresh), serta memotong logika filter dan eager loading relasi yang ada di method index(). Seharusnya diarahkan menggunakan redirect() ke route courses.index dengan membawa flash message notifikasi berhasil.
+        return redirect()->route('courses.index')->with('success', 'Mata kuliah berhasil ditambahkan.');
     }
 
     public function show(Course $course)
