@@ -10,27 +10,20 @@ class CourseController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->has('search')) {
-            session(['course_search' => $request->search]);
-        }
-        if ($request->has('status')) {
-            session(['course_status' => $request->status]);
-        }
-
-        $search = session('course_search');
-        $status = session('course_status', 'active');
-
         $query = Course::with('lecturer')->withCount('students');
 
-        if ($search) {
+        if ($request->filled('search')) {
+            $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%'.$search.'%')
                   ->orWhere('code', 'like', '%'.$search.'%');
             });
         }
 
-        if ($status) {
-            $query->where('status', $status);
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        } else {
+            $query->where('status', 'active');
         }
 
         // $courses = $query->paginate(10);, pada baris kode ini CourseController.php memanggil paginate(10) tanpa withQueryString(), sehingga ketika user berpindah halaman (klik halaman 2, 3, dst.), parameter filter seperti ?search=... dan ?status=... ikut hilang dari URL, yang menyebabkan hasil filter ter-reset ke kondisi awal meski user sudah melakukan pencarian, seharusnya ditambahkan ->withQueryString() agar query string tetap diteruskan ke setiap link halaman pagination.
