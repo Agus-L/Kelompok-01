@@ -3,7 +3,7 @@
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Tambah Mata Kuliah Baru</h1>
 
         <form action="{{ route('courses.store') }}" method="POST" class="space-y-5">
-        // Form ini sebelumnya tanpa @csrf yang menyebabkan error 419 Page Expired saat disubmit, kemudian ditambahkan @csrf untuk menyertakan token keamanan agar request POST valid dan data berhasil disimpan.
+            {{-- Form ini sebelumnya tanpa @csrf yang menyebabkan error 419 Page Expired saat disubmit, kemudian ditambahkan @csrf untuk menyertakan token keamanan agar request POST valid dan data berhasil disimpan. --}}
             @csrf
             <div class="grid grid-cols-2 gap-4">
                 <div>

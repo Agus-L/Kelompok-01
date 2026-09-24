@@ -174,4 +174,96 @@ class FixMinggu4Test extends TestCase
             'code' => 'CS302', // Tetap CS302, tidak berubah
         ]);
     }
+
+    /**
+     * FIX 3 - Test: Filter pencarian dan status tidak disimpan ke session (stateless)
+     */
+    public function test_fix3_filters_are_stateless_and_not_stored_in_session(): void
+    {
+        Course::create([
+            'code' => 'CS101',
+            'name' => 'Algoritma dan Pemrograman',
+            'sks' => 3,
+            'lecturer_id' => $this->dosen->id,
+            'status' => 'active',
+        ]);
+
+        Course::create([
+            'code' => 'CS102',
+            'name' => 'Basis Data Lanjutan',
+            'sks' => 3,
+            'lecturer_id' => $this->dosen->id,
+            'status' => 'active',
+        ]);
+
+        // Request 1: Cari Algoritma
+        $response1 = $this->actingAs($this->dosen)->get('/courses?search=Algoritma');
+        $response1->assertOk();
+        $response1->assertSee('Algoritma dan Pemrograman');
+        $response1->assertDontSee('Basis Data Lanjutan');
+
+        // Pastikan session TIDAK menyimpan parameter pencarian
+        $this->assertFalse(session()->has('course_search'));
+        $this->assertFalse(session()->has('course_status'));
+
+        // Request 2: Akses halaman /courses tanpa query parameter
+        // Harus menampilkan semua course aktif (tidak lengket ke filter sebelumnya)
+        $response2 = $this->actingAs($this->dosen)->get('/courses');
+        $response2->assertOk();
+        $response2->assertSee('Algoritma dan Pemrograman');
+        $response2->assertSee('Basis Data Lanjutan');
+    }
+
+    /**
+     * FIX 4 - Test: Pagination mempertahankan query string pencarian dan filter
+     */
+    public function test_fix4_pagination_preserves_query_string(): void
+    {
+        for ($i = 1; $i <= 15; $i++) {
+            Course::create([
+                'code' => sprintf('CS4%02d', $i),
+                'name' => 'Course Test ' . $i,
+                'sks' => 3,
+                'lecturer_id' => $this->dosen->id,
+                'status' => 'active',
+            ]);
+        }
+
+        $response = $this->actingAs($this->dosen)->get('/courses?search=Course&status=active');
+        $response->assertOk();
+
+        // Cek apakah link pagination mengandung parameter query string
+        $response->assertSee('search=Course');
+        $response->assertSee('status=active');
+    }
+
+    /**
+     * FIX 5 - Test: Method store me-redirect ke courses.index dengan pesan sukses (pola Post/Redirect/Get)
+     */
+    public function test_fix5_store_redirects_to_index_with_flash_message(): void
+    {
+        $response = $this->actingAs($this->dosen)->post('/courses', [
+            'code' => 'CS501',
+            'name' => 'Rekayasa Perangkat Lunak',
+            'description' => 'Mata kuliah RPL',
+            'sks' => 4,
+            'lecturer_id' => $this->dosen->id,
+            'status' => 'active',
+        ]);
+
+        // Memastikan redirect 302, BUKAN return view 200
+        $response->assertStatus(302);
+        $response->assertRedirect(route('courses.index'));
+        $response->assertSessionHas('success', 'Mata kuliah berhasil ditambahkan.');
+    }
+
+    /**
+     * FIX 6 - Test: Form create menyertakan CSRF token
+     */
+    public function test_fix6_create_form_contains_csrf_token(): void
+    {
+        $response = $this->actingAs($this->dosen)->get(route('courses.create'));
+        $response->assertOk();
+        $response->assertSee('name="_token"', false);
+    }
 }
