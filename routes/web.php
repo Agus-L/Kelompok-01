@@ -25,8 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/lecturer/courses', [CourseController::class, 'index'])->middleware('role:dosen')->name('courses.index');
-    Route::get('/student/courses', [CourseController::class, 'index'])->middleware('role:mahasiswa')->name('courses.index');
+    // Route::get('/lecturer/courses', [CourseController::class, 'index'])->middleware('role:dosen')->name('courses.index');
+    // Route::get('/student/courses', [CourseController::class, 'index'])->middleware('role:mahasiswa')->name('courses.index'); 
+    // terdapat dua rute terpisah untuk dosen dan mahasiswa yang didaftarkan menggunakan nama yang sama (courses.index). Akibat mekanisme penamaan rute di Laravel, rute mahasiswa menimpa rute dosen sehingga akun Dosen dan Admin mengalami penolakan akses (error 403 Forbidden) saat membuka daftar mata kuliah. Alur yang benar adalah menyatukan kedua rute tersebut ke dalam satu endpoint umum (/courses) bagi seluruh pengguna yang terotentikasi, mengingat diferensiasi hak akses dan data sudah dikelola secara terpusat melalui Policy dan Controller.
+    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
     Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
     Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
     Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
