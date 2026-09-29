@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/materials/{material}/delete', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
     Route::post('/courses/{course}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
-    Route::get('/courses/{course}/assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show');
+    Route::get('/courses/{course}/assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show')->scopeBindings();
     Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
 
     Route::post('/assignments/{assignment}/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
