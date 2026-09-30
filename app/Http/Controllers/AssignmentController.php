@@ -25,7 +25,7 @@ class AssignmentController extends Controller
         return redirect()->route('courses.show', $course)->with('success', 'Tugas berhasil dibuat.');
     }
 
-    public function show(Assignment $assignment)
+    public function show(Course $course, Assignment $assignment)
     {
         Gate::authorize('view', $assignment->course);
 
