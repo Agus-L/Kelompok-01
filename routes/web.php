@@ -36,7 +36,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/courses/{course}/materials', [MaterialController::class, 'store'])->name('materials.store');
     Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
-    Route::get('/materials/{material}/delete', [MaterialController::class, 'destroy'])->name('materials.destroy');
+    // Route::get('/materials/{material}/delete', [MaterialController::class, 'destroy'])->name('materials.destroy');
+    // Rute destruktif untuk menghapus materi sebelumnya menggunakan method HTTP GET (/materials/{material}/delete). Menggunakan GET untuk aksi destruktif melanggar standar HTTP (GET harus bersifat safe/read-only tanpa efek samping), rentan terhadap serangan CSRF (karena Laravel tidak memvalidasi token CSRF pada request GET), serta berisiko terhapus otomatis oleh web crawler atau fitur prefetch browser. Rute diperbaiki menggunakan method DELETE (/materials/{material}) sesuai standar arsitektur RESTful.
+    Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
     Route::post('/courses/{course}/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
     Route::get('/courses/{course}/assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show');

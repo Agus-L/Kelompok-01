@@ -97,7 +97,16 @@
                         @endif
 
                         @can('delete', $material)
-                        <a href="{{ route('materials.destroy', $material) }}" onclick="return confirm('Hapus materi ini?')" class="text-red-600 text-xs hover:underline">Hapus</a>
+                        {{-- 
+                            <a href="{{ route('materials.destroy', $material) }}" onclick="return confirm('Hapus materi ini?')" class="text-red-600 text-xs hover:underline">Hapus</a>
+                            Tautan <a> di atas bermasalah karena memicu HTTP GET untuk aksi destruktif (penghapusan data). Tautan GET tidak memiliki proteksi CSRF, berisiko terhapus otomatis oleh crawler/prefetch browser, dan melanggar prinsip HTTP safe method.
+                            Diperbaiki menggunakan form dengan method DELETE dan token @csrf di bawah ini:
+                        --}}
+                        <form action="{{ route('materials.destroy', $material) }}" method="POST" class="inline" onsubmit="return confirm('Hapus materi ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 text-xs hover:underline cursor-pointer">Hapus</button>
+                        </form>
                         @endcan
                     </div>
                 </div>
