@@ -21,7 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthorizationException|AccessDeniedHttpException $e, $request) {
             if ($request->is('api/*')) {
-                return response()->json(['message' => 'This action is unauthorized.'], 401);
+                // return response()->json(['message' => 'This action is unauthorized.'], 401); Ketika pengguna yang sudah login mencoba mengakses resource yang bukan haknya (misalnya mahasiswa mencoba menghapus mata kuliah), handler exception di bootstrap/app.php justru mengembalikan kode HTTP 401 Unauthorized padahal seharusnya 403 Forbidden, karena 401 berarti "kamu belum login" sedangkan 403 berarti "kamu sudah login, tapi tidak punya izin"—keduanya memiliki makna yang sangat berbeda dalam standar
+                return response()->json(['message' => 'This action is unauthorized.'], 403);
             }
         });
     })->create();
