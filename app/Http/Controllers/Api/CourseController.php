@@ -43,7 +43,9 @@ class CourseController extends Controller
         $course = Course::create($validated);
         $course->load('lecturer');
 
-        return response()->json(new CourseResource($course), 200);
+        return (new CourseResource($course))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Course $course)
@@ -77,6 +79,6 @@ class CourseController extends Controller
 
         $course->delete();
 
-        return response()->json(['message' => 'Mata kuliah berhasil dihapus'], 200);
+        return response()->noContent();
     }
 }

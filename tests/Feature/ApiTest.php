@@ -60,4 +60,16 @@ class ApiTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonPath('data.code', 'API101');
     }
+
+    public function test_api_destroy_returns_204_no_content(): void
+    {
+        $dosen = User::factory()->create(['role' => 'dosen']);
+        $course = Course::factory()->create(['lecturer_id' => $dosen->id]);
+
+        $response = $this->actingAs($dosen, 'sanctum')->deleteJson("/api/courses/{$course->id}");
+
+        $response->assertStatus(204);
+        $this->assertEmpty($response->getContent());
+        $this->assertDatabaseMissing('courses', ['id' => $course->id]);
+    }
 }
