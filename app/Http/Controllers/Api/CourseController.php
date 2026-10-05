@@ -10,12 +10,22 @@ use Illuminate\Support\Facades\Gate;
 
 class CourseController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     $courses = Course::where('status', 'active')->paginate(10);
+
+    //     return CourseResource::collection($courses);
+    // }, Method index di Api/CourseController.php memanggil Course::paginate(10) tanpa eager loading relasi lecturer dan count students, sehingga ketika CourseResource merender setiap data course, Laravel menembakkan query tambahan ke database sebanyak jumlah course (N+1 problem) yang menyebabkan performa endpoint sangat lambat dan membebani database — seharusnya ditambahkan ->with('lecturer')->withCount('students') sebelum paginate() agar semua relasi diambil dalam satu query sekaligus.
     public function index(Request $request)
     {
-        $courses = Course::where('status', 'active')->paginate(10);
+        $courses = Course::with('lecturer')
+                        ->withCount('students')
+                        ->where('status', 'active')
+                        ->paginate(10);
 
         return CourseResource::collection($courses);
     }
+
 
     public function store(Request $request)
     {
