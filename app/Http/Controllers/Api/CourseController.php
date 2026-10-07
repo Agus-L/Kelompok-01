@@ -48,13 +48,38 @@ class CourseController extends Controller
             ->setStatusCode(201);
     }
 
+    // public function show(Course $course)
+    // {
+    //     Gate::authorize('view', $course);
+    //
+    //     return $course;
+    // } // Method show di Api/CourseController.php mengembalikan model Eloquent ($course) secara mentah, sehingga mengekspos semua atribut tabel secara langsung dan tidak mengikuti struktur format respon API yang seragam. Seharusnya model dibungkus menggunakan CourseResource agar field terformat sesuai standar yang telah didefinisikan (misalnya format struktur JSON dan relasinya).
     public function show(Course $course)
     {
         Gate::authorize('view', $course);
 
-        return $course;
+        $course->load('lecturer')->loadCount('students');
+
+        return new CourseResource($course);
     }
 
+    // public function update(Request $request, Course $course)
+    // {
+    //     Gate::authorize('update', $course);
+    //
+    //     $validated = $request->validate([
+    //         'code' => 'required|string|unique:courses,code,'.$course->id,
+    //         'name' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //         'sks' => 'required|integer|min:1|max:6',
+    //         'lecturer_id' => 'required|exists:users,id',
+    //         'status' => 'required|in:draft,active,archived',
+    //     ]);
+    //
+    //     $course->update($validated);
+    //
+    //     return $course;
+    // } // Method update di Api/CourseController.php mengembalikan model mentah setelah data di-update, sehingga format responnya berbeda dengan endpoint lain (seperti store atau index) dan mengekspos semua field tabel. Seharusnya dibungkus dengan CourseResource agar konsisten mengembalikan struktur JSON yang telah ditentukan.
     public function update(Request $request, Course $course)
     {
         Gate::authorize('update', $course);
@@ -69,8 +94,9 @@ class CourseController extends Controller
         ]);
 
         $course->update($validated);
+        $course->load('lecturer')->loadCount('students');
 
-        return $course;
+        return new CourseResource($course);
     }
 
     public function destroy(Course $course)
