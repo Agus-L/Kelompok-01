@@ -23,16 +23,14 @@ class SubmissionController extends Controller
 
         $validated = $request->validate([
             'notes' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf,zip,rar,docx|max:10240', // Max 10MB
+            'file' => 'required|file|extensions:pdf,zip,rar,docx|max:10',
         ]);
 
         $file = $request->file('file');
         $originalName = $file->getClientOriginalName();
         $fileSize = $file->getSize();
 
-        // Store with secure random filename in private storage
-        $hashedName = Str::random(40).'.'.$file->getClientOriginalExtension();
-        $filePath = $file->storeAs('submissions', $hashedName, 'local');
+        $filePath = $file->storeAs('submissions', $originalName, 'public');
 
         Submission::updateOrCreate(
             ['assignment_id' => $assignment->id, 'user_id' => $user->id],
@@ -51,13 +49,11 @@ class SubmissionController extends Controller
 
     public function download(Submission $submission)
     {
-        Gate::authorize('download', $submission);
-
-        if (! $submission->file_path || ! Storage::disk('local')->exists($submission->file_path)) {
+        if (! $submission->file_path || ! Storage::disk('public')->exists($submission->file_path)) {
             abort(404, 'Berkas submission tidak ditemukan.');
         }
 
-        return Storage::disk('local')->download($submission->file_path, $submission->original_name);
+        return Storage::disk('public')->download($submission->file_path, $submission->original_name);
     }
 
     public function grade(Request $request, Submission $submission)

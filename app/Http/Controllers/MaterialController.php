@@ -67,14 +67,7 @@ class MaterialController extends Controller
 
     public function destroy(Material $material)
     {
-        Gate::authorize('delete', $material);
-
         $course = $material->course;
-
-        // Delete physical file from storage disk
-        if ($material->file_path && Storage::disk('local')->exists($material->file_path)) {
-            Storage::disk('local')->delete($material->file_path);
-        }
 
         $material->delete();
 
