@@ -18,8 +18,10 @@ class CoursePolicy
             return true;
         }
 
-        return $course->students->pluck('id')->contains($user->id);
+        // return $course->students->pluck('id')->contains($user->id); Mengambil data via $course->students memuat seluruh objek mahasiswa ke dalam memori sehingga memicu masalah N+1 query dan pemborosan memori saat otorisasi dicek. Oleh karena itu, gunakan query exists() langsung di database tanpa perlu menarik semua data ke memori.
+        return $course->students()->where('user_id', $user->id)->exists();
     }
+
 
     public function create(User $user): bool
     {
