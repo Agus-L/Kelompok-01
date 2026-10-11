@@ -10,8 +10,14 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     $query = User::query();
+    // Method index pada UserController.php tidak memanggil Gate::authorize('viewAny', User::class);, sehingga mahasiswa atau pengguna non-admin dapat mengakses endpoint /users dan melihat seluruh data sensitif pengguna lain (terjadi kebocoran data pengguna), yang seharusnya dicegah dengan menambahkan otorisasi policy di awal method index.
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', User::class);
+
         $query = User::query();
 
         if ($request->filled('role')) {
@@ -89,7 +95,13 @@ class UserController extends Controller
             $user->password = Hash::make($validated['password']);
         }
 
-        if ($request->has('role')) {
+        // if ($request->has('role')) {
+        //     $request->validate(['role' => 'required|in:admin,dosen,mahasiswa']);
+        //     $user->role = $request->role;
+        // }
+        // Blok pembaruan role pada method update di UserController.php langsung mengubah role tanpa memverifikasi kemampuan updateRole, sehingga pengguna biasa (seperti mahasiswa) dapat menyisipkan input role=admin saat mengedit profil mereka sendiri untuk menaikkan hak akses (privilege escalation), yang seharusnya dibatasi dengan menambahkan pengecekan Gate::allows('updateRole', $user).
+        // Hanya admin yang boleh mengubah role pengguna
+        if ($request->has('role') && Gate::allows('updateRole', $user)) {
             $request->validate(['role' => 'required|in:admin,dosen,mahasiswa']);
             $user->role = $request->role;
         }
