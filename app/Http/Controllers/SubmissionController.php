@@ -49,6 +49,9 @@ class SubmissionController extends Controller
 
     public function download(Submission $submission)
     {
+        Gate::authorize('download', $submission);
+        // Method download() pada SubmissionController tidak memanggil Gate::authorize('download', $submission); sehingga pengguna yang sudah login dapat mengunduh berkas tugas milik mahasiswa lain hanya dengan mengganti ID pada URL (celah IDOR), yang seharusnya dicegah dengan memvalidasi kepemilikan berkas atau peran dosen/admin melalui SubmissionPolicy sebelum berkas dikirimkan.
+
         if (! $submission->file_path || ! Storage::disk('public')->exists($submission->file_path)) {
             abort(404, 'Berkas submission tidak ditemukan.');
         }
