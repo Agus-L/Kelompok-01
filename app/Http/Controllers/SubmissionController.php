@@ -30,7 +30,9 @@ class SubmissionController extends Controller
         $originalName = $file->getClientOriginalName();
         $fileSize = $file->getSize();
 
-        $filePath = $file->storeAs('submissions', $originalName, 'public');
+        // Simpan dengan nama acak aman di storage privat (disk local)
+        $hashedName = Str::random(40).'.'.$file->getClientOriginalExtension();
+        $filePath = $file->storeAs('submissions', $hashedName, 'local');
 
         Submission::updateOrCreate(
             ['assignment_id' => $assignment->id, 'user_id' => $user->id],
@@ -52,11 +54,11 @@ class SubmissionController extends Controller
         Gate::authorize('download', $submission);
         // Method download() pada SubmissionController tidak memanggil Gate::authorize('download', $submission); sehingga pengguna yang sudah login dapat mengunduh berkas tugas milik mahasiswa lain hanya dengan mengganti ID pada URL (celah IDOR), yang seharusnya dicegah dengan memvalidasi kepemilikan berkas atau peran dosen/admin melalui SubmissionPolicy sebelum berkas dikirimkan.
 
-        if (! $submission->file_path || ! Storage::disk('public')->exists($submission->file_path)) {
+        if (! $submission->file_path || ! Storage::disk('local')->exists($submission->file_path)) {
             abort(404, 'Berkas submission tidak ditemukan.');
         }
 
-        return Storage::disk('public')->download($submission->file_path, $submission->original_name);
+        return Storage::disk('local')->download($submission->file_path, $submission->original_name);
     }
 
     public function grade(Request $request, Submission $submission)
