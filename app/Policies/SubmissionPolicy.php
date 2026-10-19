@@ -7,11 +7,6 @@ use App\Models\User;
 
 class SubmissionPolicy
 {
-    public function before(User $user, string $ability): ?bool
-    {
-        return true;
-    }
-
     public function viewAny(User $user): bool
     {
         return in_array($user->role, ['admin', 'dosen']);

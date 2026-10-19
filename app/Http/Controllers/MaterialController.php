@@ -67,6 +67,8 @@ class MaterialController extends Controller
 
     public function destroy(Material $material)
     {
+        Gate::authorize('delete', $material);
+
         $course = $material->course;
 
         // Delete physical file from storage disk
