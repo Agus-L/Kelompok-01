@@ -23,7 +23,9 @@ class SubmissionController extends Controller
 
         $validated = $request->validate([
             'notes' => 'nullable|string',
-            'file' => 'required|file|extensions:pdf,zip,rar,docx|max:10',
+            // 'file' => 'required|file|extensions:pdf,zip,rar,docx|max:10', Validasi berkas submission menggunakan aturan 'extensions' yang hanya mencocokkan string ekstensi nama berkas (rentan bypass file upload berbahaya), serta menggunakan nilai 'max:10' yang salah satuan karena Laravel mengukur berkas dalam Kilobyte (membatasi berkas hanya 10 KB sehingga berkas tugas mahasiswa selalu ditolak).
+            'file' => 'required|file|mimes:pdf,zip,rar,docx|max:10240', // Perbaikan: Mengubah aturan validasi menjadi 'mimes:pdf,zip,rar,docx' untuk memverifikasi MIME type asli berkas berdasarkan kontennya, serta mengoreksi batas ukuran menjadi 'max:10240' agar sesuai dengan kapasitas 10 MB (10.240 KB).
+
         ]);
 
         $file = $request->file('file');
