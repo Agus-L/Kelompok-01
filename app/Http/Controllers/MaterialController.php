@@ -74,6 +74,11 @@ class MaterialController extends Controller
 
         $course = $material->course;
 
+        // Hapus berkas fisik dari storage privat sebelum record database dihapus agar tidak meninggalkan berkas yatim (orphaned file)
+        if ($material->file_path && Storage::disk('local')->exists($material->file_path)) {
+            Storage::disk('local')->delete($material->file_path);
+        }
+
         $material->delete();
 
         return redirect()->route('courses.show', $course)->with('success', 'Materi berhasil dihapus.');
