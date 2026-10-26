@@ -24,8 +24,10 @@ class SendAssignmentNotificationJob implements ShouldQueue
     {
         $students = $this->assignment->course->students;
 
-        foreach ($students as $student) {
-            $student->notify(new NewAssignmentNotification($this->assignment));
-        }
+        // foreach ($students as $student) {
+        //     $student->notify(new NewAssignmentNotification($this->assignment));
+        // }
+        // Mengirim notifikasi satu per satu di dalam loop (N+1) menyebabkan inefisiensi performa karena mengeksekusi operasi dan query secara individual sebanyak jumlah siswa. Diganti menggunakan Notification::send($students, ...) agar pengiriman dikirim secara massal (bulk) dalam satu operasi.
+        Notification::send($students, new NewAssignmentNotification($this->assignment));
     }
 }
