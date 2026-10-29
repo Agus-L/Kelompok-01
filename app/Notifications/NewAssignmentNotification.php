@@ -30,13 +30,13 @@ class NewAssignmentNotification extends Notification implements ShouldQueue
             'course_name' => $this->assignment->course->name,
             'due_at' => $this->assignment->due_at->toIso8601String(),
             'message' => "Tugas baru '{$this->assignment->title}' telah ditambahkan.",
-            'student_grades' => $this->assignment->course->students->map(function ($student) {
-                return [
-                    'student_id' => $student->id,
-                    'name' => $student->name,
-                    'score' => $student->submissions()->with('grade')->get()->pluck('grade.score')->filter()->avg(),
-                ];
-            }),
+            // 'student_grades' => $this->assignment->course->students->map(function ($student) {
+            //     return [
+            //         'student_id' => $student->id,
+            //         'name' => $student->name,
+            //         'score' => $student->submissions()->with('grade')->get()->pluck('grade.score')->filter()->avg(),
+            //     ];
+            // }), mencantumkan daftar nama dan nilai rata-rata seluruh mahasiswa (student_grades) ke dalam data notifikasi tugas baru, dampaknya memicu kebocoran data pribadi di mana setiap mahasiswa dapat mengintip nilai teman sekelasnya dari payload notifikasi serta menyebabkan query database yang sangat lambat (N+1 queries), sehingga seharusnya bagian student_grades dihapus sepenuhnya agar notifikasi hanya memuat atribut dasar yang relevan dengan tugas baru.
         ];
     }
 }
