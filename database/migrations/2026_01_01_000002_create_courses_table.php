@@ -15,7 +15,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('sks');
             $table->foreignId('lecturer_id')->constrained('users')->restrictOnDelete();
-            $table->enum('status', ['draft', 'active', 'archived'])->default('draft');
+            // $table->enum('status', ['draft', 'active', 'archived'])->default('draft'); kolom status tidak diberi ->index(), dampaknya setiap kali pengguna membuka atau menyaring daftar mata kuliah, database terpaksa mengecek seluruh baris data satu per satu dari awal sampai akhir (full table scan) sehingga loading website menjadi lambat jika datanya sudah banyak, sehingga seharusnya ditambahkan ->index() agar database memiliki jalan pintas pencarian yang cepat dan efisien.
+            $table->enum('status', ['draft', 'active', 'archived'])->default('draft')->index();
             $table->timestamps();
         });
     }
