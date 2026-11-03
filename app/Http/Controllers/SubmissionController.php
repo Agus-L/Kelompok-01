@@ -23,7 +23,14 @@ class SubmissionController extends Controller
 
         $validated = $request->validate([
             'notes' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf,zip,rar,docx|max:'.env('MAX_SUBMISSION_SIZE', 10240),
+            // 'file' => 'required|file|mimes:pdf,zip,rar,docx|max:'.env('MAX_SUBMISSION_SIZE', 10240),
+            // Memanggil helper env() di luar direktori config/ (seperti di Controller) adalah bad practice di Laravel.
+            // Saat perintah 'php artisan config:cache' dijalankan di production, berkas .env tidak akan dimuat lagi.
+            // Akibatnya, semua pemanggilan env() di luar config/ akan selalu mengembalikan null (atau nilai fallback-nya),
+            // sehingga konfigurasi di file .env diabaikan.
+            // Jadi solusinya adalah nilai environment didaftarkan di berkas config (misal: config/app.php -> 'max_submission_size'),
+            // lalu dipanggil di Controller menggunakan helper config().
+            'file' => 'required|file|mimes:pdf,zip,rar,docx|max:'.config('app.max_submission_size', 10240),
         ]);
 
         $file = $request->file('file');

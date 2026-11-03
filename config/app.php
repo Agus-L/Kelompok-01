@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Max Submission Size
+    |--------------------------------------------------------------------------
+    |
+    | Batas ukuran maksimal file unggahan tugas (dalam kilobyte).
+    | Didaftarkan di sini agar env('MAX_SUBMISSION_SIZE') hanya dipanggil
+    | di dalam direktori config/ dan tetap dapat dibaca saat config di-cache.
+    |
+    */
+
+    'max_submission_size' => env('MAX_SUBMISSION_SIZE', 10240),
+
 ];
