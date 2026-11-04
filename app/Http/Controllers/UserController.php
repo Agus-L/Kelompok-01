@@ -28,7 +28,11 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->get();
+        // $users = $query->get();
+        // Pemanggilan $query->get() menarik seluruh data baris pengguna dari tabel users ke dalam memori aplikasi sekaligus tanpa batasan.
+        // Pada skala data yang besar (ratusan/ribuan pengguna), hal ini menyebabkan pemborosan alokasi RAM server dan memperlambat waktu respon rendering halaman.
+        // Sesuai perbaikan masalah ke-5 FIX Minggu 11 ("seluruh data dimuat tanpa pagination"), kueri diubah menggunakan pagination database ->paginate(10)->withQueryString() agar filter dan pencarian tetap bertahan saat berpindah halaman.
+        $users = $query->paginate(10)->withQueryString();
 
         return view('users.index', compact('users'));
     }
