@@ -65,7 +65,9 @@ class CourseController extends Controller
     {
         Gate::authorize('view', $course);
 
-        $course->load(['lecturer', 'materials']);
+        // $course->load(['lecturer', 'materials']);
+        // Method show pada CourseController.php hanya memuat relasi lecturer dan materials tanpa melakukan eager loading bertingkat untuk penugasan, sehingga saat view courses/show.blade.php merender $course->assignments, $assignment->submissions, hingga nama mahasiswa $submission->student->name, Laravel menembakkan puluhan hingga ratusan query tambahan secara berulang (N+1 pada 3 tingkat relasi) yang memperlambat rendering halaman mata kuliah secara drastis, yang seharusnya dicegah dengan menambahkan 'assignments.submissions.student' ke dalam pemanggilan $course->load(...).
+        $course->load(['lecturer', 'materials', 'assignments.submissions.student']);
 
         return view('courses.show', compact('course'));
     }

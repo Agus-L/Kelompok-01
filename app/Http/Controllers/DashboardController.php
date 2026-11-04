@@ -14,8 +14,11 @@ class DashboardController extends Controller
         $user = $request->user();
 
         if ($user->role === 'admin') {
-            $totalUsers = User::all()->count();
-            $totalCourses = Course::all()->count();
+            // $totalUsers = User::all()->count();
+            // $totalCourses = Course::all()->count();
+            // Pemanggilan User::all()->count() dan Course::all()->count() pada DashboardController.php memanggil ::all() terlebih dahulu sehingga database mengeksekusi SELECT * yang menarik seluruh ribuan baris data ke dalam memori aplikasi sebelum menghitung jumlahnya di PHP (pemborosan CPU dan memori/RAM yang berisiko out of memory), yang seharusnya diganti langsung dengan agregat query database User::count() dan Course::count() (SELECT COUNT(*)).
+            $totalUsers = User::count();
+            $totalCourses = Course::count();
             $recentCourses = Course::with('lecturer')->latest()->take(5)->get();
 
             return view('dashboard.admin', compact('totalUsers', 'totalCourses', 'recentCourses'));
