@@ -38,7 +38,9 @@ class CourseController extends Controller
     {
         Gate::authorize('create', Course::class);
 
-        $lecturers = User::where('role', 'dosen')->get();
+        // $lecturers = User::where('role', 'dosen')->get();
+        // Pemanggilan User::where('role', 'dosen')->get() mengeksekusi SELECT * yang menarik seluruh kolom tabel users (termasuk password, remember_token, email, dll) ke memori aplikasi, padahal pada view courses/create.blade.php dan courses/edit.blade.php hanya kolom id dan name yang dipakai untuk dropdown pilihan dosen pengampu, sehingga diefisienkan menggunakan ->select('id', 'name').
+        $lecturers = User::where('role', 'dosen')->select('id', 'name')->get();
 
         return view('courses.create', compact('lecturers'));
     }
@@ -76,7 +78,9 @@ class CourseController extends Controller
     {
         Gate::authorize('update', $course);
 
-        $lecturers = User::where('role', 'dosen')->get();
+        // $lecturers = User::where('role', 'dosen')->get();
+        // Pemanggilan User::where('role', 'dosen')->get() mengeksekusi SELECT * yang menarik seluruh kolom tabel users, padahal view courses/edit.blade.php hanya membutuhkan kolom id dan name untuk dropdown dosen pengampu, sehingga diefisienkan menggunakan ->select('id', 'name').
+        $lecturers = User::where('role', 'dosen')->select('id', 'name')->get();
 
         return view('courses.edit', compact('course', 'lecturers'));
     }
