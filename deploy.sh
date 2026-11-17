@@ -14,9 +14,11 @@ git pull origin main
 # Install dependensi PHP tanpa dev dependencies
 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
-# Jalankan migrasi dan seeder database tiap deploy
+# Jalankan migrasi database tiap deploy
+# CATATAN PERBAIKAN: Perintah `php artisan db:seed --force` dihapus dari skrip deploy otomatis.
+# Seeder hanya boleh dijalankan satu kali saat setup awal server. Jika dijalankan setiap kali deploy,
+# seeder akan menyebabkan duplikasi data (error unique constraint) atau menimpa/mereset data pengguna nyata di produksi.
 php artisan migrate --force
-php artisan db:seed --force
 
 # Cache konfigurasi, routes, dan views untuk performa
 php artisan config:cache
