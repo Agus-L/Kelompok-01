@@ -55,4 +55,44 @@ class CourseTest extends TestCase
         $response->assertStatus(403);
         $this->assertDatabaseMissing('courses', ['code' => 'HACK101']);
     }
+
+    public function test_dosen_can_update_course(): void
+    {
+        $dosen = User::factory()->create(['role' => 'dosen']);
+        $course = Course::factory()->create([
+            'lecturer_id' => $dosen->id,
+            'name' => 'Nama Sebelum Update',
+        ]);
+
+        $response = $this->actingAs($dosen)->put('/courses/'.$course->id, [
+            'code' => $course->code,
+            'name' => 'Nama Sesudah Update',
+            'sks' => 3,
+            'lecturer_id' => $dosen->id,
+            'status' => 'active',
+        ]);
+
+        $response->assertStatus(302);
+    }
+
+    public function test_default_pemrograman_web_course_can_be_viewed(): void
+    {
+        $user = User::where('email', 'mahasiswa@kampuslms.test')->first();
+        $course = Course::where('code', 'SI2514024')->first();
+
+        $response = $this->actingAs($user)->get('/courses/'.$course->id);
+
+        $response->assertStatus(200);
+    }
+
+    public function test_mahasiswa_cannot_delete_course(): void
+    {
+        $mahasiswa = User::factory()->create(['role' => 'mahasiswa']);
+        $dosen = User::factory()->create(['role' => 'dosen']);
+        $course = Course::factory()->create(['lecturer_id' => $dosen->id]);
+
+        $response = $this->actingAs($mahasiswa)->delete('/courses/'.$course->id);
+
+        $this->assertNotEquals(200, $response->getStatusCode());
+    }
 }

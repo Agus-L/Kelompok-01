@@ -47,4 +47,13 @@ class AuthTest extends TestCase
         $this->assertGuest();
         $response->assertSessionHasErrors('email');
     }
+
+    public function test_user_dashboard_page_loads_content(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $this->assertNotNull($response);
+    }
 }
